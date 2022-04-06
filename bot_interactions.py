@@ -12,6 +12,7 @@ import os
 import interactions
 # doc available in https://discord-py-slash-command.readthedocs.io/en/latest/
 # Source code https://github.com/interactions-py/library
+from dice_roll import roll
 
 bot = interactions.Client(os.getenv('BOT_TOKEN'))
 
@@ -215,35 +216,6 @@ async def chg_scoreboard(ctx: interactions.CommandContext, sc_name, usr_name, va
 #     Roll dices
 # ***************************
 
-def parse_dice(dices_txt:str):
-    nb = 0
-    type = 0
-    modi = 0
-
-    parse = dices_txt.split('d')
-    nb = int(parse[0])
-
-    parse = parse[1].split('+') # then parses = ["j","x-y"]
-    if (len(parse)==1): # (j-y)
-        parse = parse[0].split('-') # then parses = ["j","y"]
-        type = int(parse[0])
-        if (len(parse)==2): # (idj  -x)
-            modi -= int(parse[1])
-    else: # (idj +x -?)
-        parse = parse[1].split('-') # then parses = ["j","x","y"]
-        type = int(parse[0])
-        if (len(parse)==2): # (idj +x -y)
-            modi -= int(parse[1])
-            modi += int(parse[0])
-        else:  # (idj +x)
-            modi += int(parse[0])
-    # modi += int(parse[1])
-    # parse = parse[0].split('-')
-    # if (len(parse)==2):
-    #     modi -= int(parse[1])
-
-    return [nb, type, modi]
-
 @bot.command(
     name='roll',
     description='Roll some dices!',
@@ -258,34 +230,13 @@ def parse_dice(dices_txt:str):
     ]
 )
 async def roll_dices(ctx: interactions.CommandContext, dices_txt):
-    nb = 0
-    modi = 0
-    try:
-        parse = dices_txt.split('d')
-        nb = int(parse[0])
-        parse = parse[1].split('+')
-        if (len(parse)==2):
-            modi += int(parse[1])
-        parse = parse[0].split('-')
-        if (len(parse)==2):
-            modi -= int(parse[1])
-        # break
-    except KeyError:
-        await __print_msg(ctx, "The "+ sc_name +" scoreboard doesn't exist!")
-        return
-    try:
-        sc[usr_name]
-        # break
-    except KeyError:
-        sc[usr_name] = int(value)
-        await __print_msg(ctx, "The entry for "+ usr_name +" was created!")
-        return
-
-    sc[usr_name] = int(value)
-    await __print_msg(ctx, "The entry for "+ usr_name +" was changed to "+value+"!")
-    await __print_msg(ctx, "The entry for "+ str(sc) +' '+ usr_name +" was created!")
-
-
+    rd_res, value= roll(dices_txt)
+    msg ="Lance "+dices_txt+"\n"
+    if (value==len(rd_res)):
+        msg+= "ECHEC CRITIQUE"
+    else:
+        msg+="Le lancer donne : "+str(value)
+    await __print_msg(ctx, msg + "\n" + "Le lancer était : "+ str(rd_res)+" !")
 
 
 ## Routines start
