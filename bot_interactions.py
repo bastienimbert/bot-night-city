@@ -231,7 +231,7 @@ async def chg_scoreboard(ctx: interactions.CommandContext, sc_name, usr_name, va
 )
 async def roll_dices(ctx: interactions.CommandContext, dices_txt):
     rd_res, value= roll(dices_txt)
-    msg ="Lance "+dices_txt+"\n"
+    msg = str(ctx.author.mention) + " throws "+dices_txt+"\n"
     if (value==len(rd_res)):
         msg+= "ECHEC CRITIQUE"
     else:
